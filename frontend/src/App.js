@@ -1,12 +1,12 @@
 import logo from './logo.svg';
 import './App.css';
 import React from 'react';
-import FileUpload from './components/FileUpload';
+import Uploader from './components/Uploader/Uploader';
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-          <FileUpload />
+          <Uploader />
       </header>
     </div>
   );
