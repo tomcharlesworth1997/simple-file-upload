@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/test/';
+const API_URL = process.env.UPLOADER_API_URL || 'https://lpfkbegpzedfqxl7vvd46db3wq0hdftx.lambda-url.us-east-1.on.aws/';
 export const uploadFile = async (file) => {
   try {
     const formData = new FormData();

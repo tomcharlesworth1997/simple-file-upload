@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "simple-file-upload"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-166f4pdx0kwzj"
+s3_prefix = "simple-file-upload"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
