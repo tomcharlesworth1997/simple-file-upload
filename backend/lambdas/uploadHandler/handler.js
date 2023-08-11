@@ -1,26 +1,29 @@
 const AWS = require('aws-sdk');
 
+const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME; // Environment variable for S3 bucket name
+
 exports.handler = async (event) => {
   try {
     console.log('Event:', event);
 
-    // Parse the body if it's base64 encoded
-    let decodedBody;
-    if (event.isBase64Encoded) {
-      decodedBody = Buffer.from(event.body, 'base64').toString('utf-8');
-    } else {
-      decodedBody = event.body;
-    }
+    const formData = event.body; // The entire form data
     
-    console.log('Decoded Body:', decodedBody);
+    // Initialize the S3 instance
+    const s3 = new AWS.S3();
 
-    const body = JSON.parse(decodedBody);
-    console.log('Parsed Body:', body);
+    const currentTimestamp = new Date().toISOString().replace(/[-:.]/g, '');
+    const s3Key = `uploads/${currentTimestamp}`;
 
-    const file = body.file; // Assuming the field name is 'file' in the request
+    // Define S3 upload parameters
+    const params = {
+      Bucket: S3_BUCKET_NAME,
+      Key: s3Key,
+      Body: event.body,
+    };
 
-    // Process the uploaded file (you can save it to S3, perform processing, etc.)
-    // In this example, let's just return a response with a success message
+    // Upload the file data to S3
+    await s3.upload(params).promise();
+
     return {
       statusCode: 200,
       body: JSON.stringify({ message: 'File uploaded successfully' }),

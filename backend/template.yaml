@@ -2,9 +2,20 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 
 Resources:
+  FileUploadBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub "simple-file-upload-bucket-${AWS::AccountId}"
+  
   FileUploadFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
       CodeUri: lambdas/uploadHandler
       Handler: handler.handler
       Runtime: nodejs14.x
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: !Ref FileUploadBucket
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref FileUploadBucket

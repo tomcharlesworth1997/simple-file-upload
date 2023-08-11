@@ -4,7 +4,7 @@ const API_URL = process.env.UPLOADER_API_URL || 'https://lpfkbegpzedfqxl7vvd46db
 export const uploadFile = async (file) => {
   try {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', file, file.name); // Pass the file name as the third parameter
 
     const response = await axios.post(API_URL, formData, {
       headers: {
