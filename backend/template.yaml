@@ -59,6 +59,8 @@ Resources:
 
   FileUploadApi:
     Type: 'AWS::Serverless::Api'
+    Properties:
+      StageName: prod
 
 
   FileUploadFunction:
