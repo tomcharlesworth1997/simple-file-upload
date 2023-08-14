@@ -41,6 +41,46 @@ Resources:
               - "s3:PutObject"
             Resource: !Sub "arn:aws:s3:::simple-file-upload-bucket-${AWS::AccountId}/*"
 
+  FileUploaderAppBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub "file-uploader-app-bucket-${AWS::AccountId}"
+      WebsiteConfiguration:
+        IndexDocument: 'index.html'
+        ErrorDocument: 'index.html'
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - "GET"
+            AllowedOrigins:
+              - "*"
+
+  FileUploadApi:
+    Type: 'AWS::Serverless::Api'
+
+
+  FileUploadFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: lambdas/uploadHandler
+      Handler: handler.handler
+      Runtime: nodejs14.x
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: !Ref FileUploadBucket
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref FileUploadBucket
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /upload  # Customize the endpoint path as needed
+            Method: POST  # Specify the HTTP method you want to use
+            RestApiId: !Ref FileUploadApi
+
 Outputs:
   AccessKeyId:
     Description: "Access Key ID for S3 uploader"
@@ -53,16 +93,14 @@ Outputs:
     Value: !GetAtt [S3FileUploaderKeys, "SecretAccessKey"]
     Export:
       Name: "SecretAccessKey"
-      
-  # FileUploadFunction:
-  #   Type: 'AWS::Serverless::Function'
-  #   Properties:
-  #     CodeUri: lambdas/uploadHandler
-  #     Handler: handler.handler
-  #     Runtime: nodejs14.x
-  #     Environment:
-  #       Variables:
-  #         S3_BUCKET_NAME: !Ref FileUploadBucket
-  #     Policies:
-  #       - S3CrudPolicy:
-  #           BucketName: !Ref FileUploadBucket
+
+  ApiEndpoint:
+    Description: "API Gateway endpoint URL"
+    Value:
+      Fn::Sub:
+        - "https://${Api}.execute-api.${Region}.amazonaws.com/${Stage}/upload"  # Customize the endpoint path as needed
+        - Api: !Ref FileUploadApi
+          Region: !Ref "AWS::Region"
+          Stage: prod
+    Export:
+      Name: "ApiEndpoint"

@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk';
 
 export const uploadFile = async (file) => {
-  const S3_BUCKET = process.env.S3_BUCKET || "DUMMY";
+  const S3_BUCKET = process.env.S3_BUCKET || "simple-file-upload-bucket";
   const REGION = process.env.REGION || "us-east-1";
 
   AWS.config.update({
@@ -30,6 +30,5 @@ export const uploadFile = async (file) => {
 
   await upload.then((err, data) => {
     console.log(err);
-    alert("File uploaded successfully.");
   });
 };
