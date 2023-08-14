@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { uploadFile } from '../../services/uploaderService';
+import { uploadFile } from '../../services/uploaderServiceS3';
 
 const FileUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -23,7 +23,8 @@ const FileUpload = () => {
       try {
         setUploadStatus('Uploading...');
         const response = await uploadFile(selectedFile);
-        setUploadStatus(`Upload successful: ${response.message}`);
+        console.log(response)
+        setUploadStatus(`Upload successful...`);
       } catch (error) {
         console.error('Error:', error);
         setUploadStatus('Upload failed');
@@ -46,11 +47,11 @@ const FileUpload = () => {
         </div>
       )}
 
-      {fileContent && (
+      {/* {fileContent && (
         <div>
             <p>File Content: {fileContent}</p>
         </div>
-      )}
+      )} */}
     </
     div>
   );

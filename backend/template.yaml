@@ -2,20 +2,67 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 
 Resources:
+
   FileUploadBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
       BucketName: !Sub "simple-file-upload-bucket-${AWS::AccountId}"
-  
-  FileUploadFunction:
-    Type: 'AWS::Serverless::Function'
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - "PUT"
+              - "POST"
+              - "DELETE"
+              - "GET"
+            AllowedOrigins:
+              - "*"
+
+  S3FileUploaderUser:
+    Type: "AWS::IAM::User"
+
+  S3FileUploaderKeys:
+    Type: "AWS::IAM::AccessKey"
     Properties:
-      CodeUri: lambdas/uploadHandler
-      Handler: handler.handler
-      Runtime: nodejs14.x
-      Environment:
-        Variables:
-          S3_BUCKET_NAME: !Ref FileUploadBucket
-      Policies:
-        - S3CrudPolicy:
-            BucketName: !Ref FileUploadBucket
+      UserName: !Ref S3FileUploaderUser
+
+  S3UploaderPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: "AllowS3Uploads"
+      Users:
+        - !Ref S3FileUploaderUser
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action:
+              - "s3:PutObject"
+            Resource: !Sub "arn:aws:s3:::simple-file-upload-bucket-${AWS::AccountId}/*"
+
+Outputs:
+  AccessKeyId:
+    Description: "Access Key ID for S3 uploader"
+    Value: !Ref S3FileUploaderKeys
+    Export:
+      Name: "AccessKeyId"
+
+  SecretAccessKey:
+    Description: "Secret Access Key for S3 uploader"
+    Value: !GetAtt [S3FileUploaderKeys, "SecretAccessKey"]
+    Export:
+      Name: "SecretAccessKey"
+      
+  # FileUploadFunction:
+  #   Type: 'AWS::Serverless::Function'
+  #   Properties:
+  #     CodeUri: lambdas/uploadHandler
+  #     Handler: handler.handler
+  #     Runtime: nodejs14.x
+  #     Environment:
+  #       Variables:
+  #         S3_BUCKET_NAME: !Ref FileUploadBucket
+  #     Policies:
+  #       - S3CrudPolicy:
+  #           BucketName: !Ref FileUploadBucket
