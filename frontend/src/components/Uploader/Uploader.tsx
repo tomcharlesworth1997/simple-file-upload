@@ -1,31 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import { uploadFile as uploaderServiceS3 } from '../../services/uploaderServiceS3';
 import { uploadFile as uploadFileLambda } from '../../services/uploaderServiceApi';
 
-const FileUpload = () => {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [fileContent, setFileContent] = useState(null);
-  const [uploadStatus, setUploadStatus] = useState(null);
-  const [useS3Uploader, setUseS3Uploader] = useState(true); // Set the initial uploader
+const FileUpload: React.FC = () => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileContent, setFileContent] = useState<string | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
+  const [useS3Uploader, setUseS3Uploader] = useState<boolean>(true);
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    setSelectedFile(file);
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files && event.target.files[0]; // TODO: 
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const fileContents = e.target.result;
-      setFileContent(fileContents);
-    };
-    reader.readAsText(file);
+    if (file) {
+      setSelectedFile(file);
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const fileContents = e.target?.result as string;
+        setFileContent(fileContents);
+      };
+      reader.readAsText(file);
+    }
   };
 
   const handleUpload = async () => {
     if (selectedFile) {
       try {
         setUploadStatus('Uploading...');
-        
-        // Use the appropriate uploader based on the feature toggle
+
         if (useS3Uploader) {
           const response = await uploaderServiceS3(selectedFile);
           console.log(response);
@@ -33,7 +35,7 @@ const FileUpload = () => {
           const response = await uploadFileLambda(selectedFile);
           console.log(response);
         }
-        
+
         setUploadStatus('Upload successful');
       } catch (error) {
         console.error('Error:', error);
@@ -49,7 +51,6 @@ const FileUpload = () => {
       <button onClick={handleUpload}>Upload</button>
       <p>{uploadStatus}</p>
 
-      {/* Feature toggle */}
       <label>
         <input
           type="checkbox"
